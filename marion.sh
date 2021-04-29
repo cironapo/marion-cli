@@ -1,7 +1,7 @@
 #!/bin/bash
-repository_host='hosting4.3d0.it'
-repository_user='repository'
-repository_pwd='c0d3m4g1c'
+repository_host=''
+repository_user=''
+repository_pwd=''
 dirname="${PWD##*/}"
 
 # store arguments in a special array 
