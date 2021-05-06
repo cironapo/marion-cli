@@ -11,7 +11,7 @@ Shutdown del progetto
 ```bash
 marion down
 ```
-**Database**: 
+**Database**:  
 Aggiornamento database
 ```bash
 marion db refresh
