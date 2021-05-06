@@ -16,7 +16,7 @@ In fase di sviluppo **Marion** utilizza una cartella nella root del progetto den
 Nella fase di installazione del progetto la cartella viene popolata con il database di base di Marion.  
 E' possibile interagire con il databse attraverso la cli mediante i seguenti comandi.  
 
-**Aggiornamento database**
+**Aggiornamento database**  
 Il seguente comando permette di effettuare un aggiornamento del database locale con quello presente nella root del progetto nel file **database.sql**
 ```bash
 marion db refresh
