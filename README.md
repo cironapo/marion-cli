@@ -12,6 +12,10 @@ Shutdown del progetto
 marion down
 ```
 ## Database  
+In fase di sviluppo **Marion** crea una cartella nella root del progetto denominata **mysql** in cui verrà memorizzatio il database in maniera persistente.  
+Nella fase di installazione del progetto la cartella viene popolata con il database di base di Marion.  
+E' possibile interagire con il databse attraverso la cli mediante i seguenti comandi.  
+
 **Aggiornamento database**
 Il seguente comando permette di effettuare un aggiornamento del database locale con quello presente nella root del progetto nel file **database.sql**
 ```bash
