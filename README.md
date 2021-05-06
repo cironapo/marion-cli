@@ -21,7 +21,7 @@ Il seguente comando permette di effettuare un aggiornamento del database locale 
 ```bash
 marion db refresh
 ```
-**Esportazione database**
+**Esportazione database**   
 Il seguente comando permette di esportare il database corrente. Il file viene esportato nella root del progetto con il nome **database.sql**
 ```bash
 marion db export
