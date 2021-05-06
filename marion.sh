@@ -880,11 +880,15 @@ init(){
 	mkdir mysql
 	unzip marion.zip
 	rm -f marion.zip
-	docker exec -ti -w /app/ $dirname"_web_1" composer install
 	echo "/mysql
 /minimized
 /cache
 .env" > .gitignore
+	docker run --name $dir'_composer' -v $(pwd):/app -w /app/ webdevops/php-apache-dev:$PHP_VERSION composer install
+	docker rm -f $dir'_composer'
+
+	docker run --name $dir'_db' -v $(pwd)/mysql:/var/lib/mysql mysql:5.7.31 mysql -u $DB_USER -p$DB_PASS $DB_NAME < database.sql 2>/dev/null
+	docker rm -f $dir"_db"
 	git init
 	echo $green' Il tuo progetto marion è stato installato con successo. Buon divertimento!'
 	exit
@@ -896,6 +900,10 @@ then
 	envup
 fi
 case $cmd in
+  'test')
+	docker run --name $dirname'_composer' -v $(pwd):/app -w /app/ webdevops/php-apache-dev:$PHP_VERSION composer install
+	docker rm -f $dirname'_composer'
+	;;
   'clone')
 	;;
   'init')
