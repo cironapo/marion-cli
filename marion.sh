@@ -1,7 +1,7 @@
 #!/bin/bash
-repository_host=''
-repository_user=''
-repository_pwd=''
+repository_host='hosting4.3d0.it'
+repository_user='repository'
+repository_pwd='c0d3m4g1c'
 dirname="${PWD##*/}"
 
 # store arguments in a special array 
@@ -285,7 +285,7 @@ class '$class_widget'Component extends  PageComposerComponent{
 			
 
 		*/
-		PageComposer::registerJS(_MARION_BASE_URL_."modules/widget_starter/js/script.js");
+		PageComposer::registerJS(_MARION_BASE_URL_."modules/'$tag'/js/script.js");
 	}
 	function registerCSS($data=null){
 		/*
@@ -295,7 +295,7 @@ class '$class_widget'Component extends  PageComposerComponent{
 			
 
 		*/
-		PageComposer::registerCSS(_MARION_BASE_URL_."/modules/widget_starter/css/style.css");
+		PageComposer::registerCSS(_MARION_BASE_URL_."modules/'$tag'/css/style.css");
 	}
 
 	function build($data=null){
@@ -338,7 +338,7 @@ class '$class_widget'Component extends  PageComposerComponent{
 				touch css/style.css
 				if [ $has_widget == 's' ]
 				then
-				echo '<?xml version='1.0'?>
+				echo '<?xml version="1.0"?>
 <module>
 	<info> 
 		<author>'$author'</author>
@@ -585,7 +585,7 @@ create_page(){
 {% endblock %}' 	> modules/$module/templates_twig/front/$name".htm"
 					else
 					echo '
-{% extends "layouts/backend.htm" %}
+{% extends "layouts/page_backend.htm" %}
 {% block backend_header %}
 	title
 {% endblock %}
@@ -657,8 +657,7 @@ create_ctrl(){
 				if [ -f modules/$module/templates_twig/front/$page".htm" ]; then
 				echo $red'Errore: la pagina '$page'.htm giè esiste'
 				else
-					echo '
-{% extends "layouts/page.htm" %}
+					echo '{% extends "layouts/page.htm" %}
 {% block content %}
 
 {% endblock %}' 	> modules/$module/templates_twig/front/$page".htm"
@@ -670,8 +669,7 @@ create_ctrl(){
 				if [ -f modules/$module/templates_twig/front/$page".htm" ]; then
 					echo $red'Errore: la pagina '$page'.htm giè esiste'
 				else
-					echo '
-{% extends 'layouts/page_backend.htm' %}
+					echo '{% extends 'layouts/page_backend.htm' %}
 {% block backend_header %}
 	<!---IMAGE<img src="">-->{{tr("titolo pagina '$page'","'$module'")}}
 {% endblock %}
@@ -692,8 +690,7 @@ create_ctrl(){
 				exit;
 			fi
 
-			echo '
-<?php
+			echo '<?php
 use Marion\Controllers\FrontendController;
 class '$nameCtrl'Controller extends FrontendController{	
 
@@ -711,8 +708,7 @@ class '$nameCtrl'Controller extends FrontendController{
 					echo $red'Errore: il controller '$nameCtrl' già esiste'
 					exit;
 				fi
-				echo '
-<?php
+				echo '<?php
 use Marion\Controllers\BackendController;
 class '$nameCtrl'Controller extends BackendController{	
 	public $auth=""; //permesso per accedere al controller
@@ -732,8 +728,7 @@ class '$nameCtrl'Controller extends BackendController{
 				echo $red'Errore: il controller '$nameCtrl' già esiste'
 				exit;
 			fi
-			echo '
-<?php
+			echo '<?php
 use Marion\Controllers\ModuleController;
 class '$nameCtrl'Controller extends ModuleController{	
 	public $auth=""; //permesso per accedere al controller
@@ -753,9 +748,9 @@ class '$nameCtrl'Controller extends ModuleController{
 				echo $red'Errore: il controller '$nameCtrl' già esiste'
 				exit;
 			fi
-			echo '
-<?php
+			echo '<?php
 use Marion\Controllers\AdminModuleController;
+use Illuminate\Database\Capsule\Manager as DB;
 class '$nameCtrl'Controller extends AdminModuleController{	
 	public $auth=""; //permesso per accedere al controller
 
@@ -775,12 +770,40 @@ class '$nameCtrl'Controller extends AdminModuleController{
 		$this->setMenu("'$nameCtrl'_edit"); //attiva la voce di menu del backend.
 		$action = $this->getAction(); // valori ammessi "add","edit"
 
-		if( $action == "add" ){
-			// insert
-		}else{
-			// update
-		}
+		if( $this->isSubmitted() ){
+			//il form è stato sottomesso
 
+			//prendo i dati del POST
+			$data = $this->getFormdata();
+			
+			//controllo i dati con un form di controllo opportunamente creato
+			$check = $this->checkDataForm("form-control-name",$data);
+
+			
+			if( $check[0] == "nak"){
+				//se ci sono errori passo l errore al template
+				$this->errors[] = $check[1];
+			}else{
+				//salvataggio dati
+				if( $action != "add" ){
+					// insert
+				}else{
+					$data = null;
+				}
+			}
+		}else{
+
+			if( $action != "add" ){
+				// popolo il form con i dati presenti nel db
+				$data = [];
+			}else{
+				$data = null;
+			}
+		}
+		
+
+		$dataform = $this->getDataForm("form-control-name",$data);
+		$this->setVar("dataform",$dataform);
 		$this->output("form.htm"); 
 	}
 
@@ -857,10 +880,12 @@ init(){
 	mkdir mysql
 	unzip marion.zip
 	rm -f marion.zip
+	docker exec -ti -w /app/ $dirname"_web_1" composer install
 	echo "/mysql
 /minimized
 /cache
 .env" > .gitignore
+	git init
 	echo $green' Il tuo progetto marion è stato installato con successo. Buon divertimento!'
 	exit
 }
@@ -871,6 +896,8 @@ then
 	envup
 fi
 case $cmd in
+  'clone')
+	;;
   'init')
 		dir=$2
 		while [[ "$dir" == "" ]]
@@ -1025,6 +1052,10 @@ case $cmd in
 		  'uninstall')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_uninstall.php $3
 		  ;;
+		  'reset')
+			docker exec -w /app $dirname"_web_1" php lib/console/module_uninstall.php $3
+			docker exec -w /app $dirname"_web_1" php lib/console/module_install.php $3
+		  ;;
 		  'active')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_active.php $3
 		  ;;
@@ -1068,7 +1099,7 @@ case $cmd in
 		esac
 	   ;;
   'down')
-	  docker rm -f $dirname"_web_1" $dirname"_phpmyadmin_1" $dirname"_db_1"
+	  docker-compose down
 	  ;;
    'open')
 	  case $2 in
@@ -1080,16 +1111,42 @@ case $cmd in
 			;;
 		esac
 	   ;;
+  'share')
+	   $NGROK_PATH http $APACHE_PORT_EXPOSED
+  	   ;;
   'db')
 	  case $2 in
 		   'import')
-			  docker exec -i $dirname"_db_1" mysql -u $DB_USER -p$DB_PASS $DB_NAME < database.sql
-			  echo $green'database importato'
+		   	  check=''
+			  while [[ "$check" == "" ]]
+			  do
+					echo "Sicuro di volere importare il database?"
+					read -p "Specificare un valore (s/n): " check
+			  done
+			  if [ $check == 's' ];	then
+				 docker exec -i $dirname"_db_1" mysql -u $DB_USER -p$DB_PASS $DB_NAME < database.sql 2>/dev/null
+			  	 echo $green'database importato'
+			  fi
+			;;
+			'refresh')
+			  check=''
+			  while [[ "$check" == "" ]]
+			  do
+					echo "Sicuro di volere ricaricare il database?"
+					read -p "Specificare un valore (s/n): " check
+			  done
+			  if [ $check == 's' ];	then
+				docker exec -i $dirname"_db_1" mysql -u $DB_USER -p$DB_PASS -e "DROP DATABASE IF EXISTS $DB_NAME" 2>/dev/null
+				docker exec -i $dirname"_db_1" mysql -u $DB_USER -p$DB_PASS -e "CREATE DATABASE $DB_NAME" 2>/dev/null
+				docker exec -i $dirname"_db_1" mysql -u $DB_USER -p$DB_PASS $DB_NAME < database.sql 2>/dev/null
+				echo $green'database ricaricato'
+			  fi
+			  
 			;;
 			'export')
 			  docker exec -ti $dirname"_db_1" mysqldump --no-tablespaces -u $DB_USER -p$DB_PASS $DB_NAME > database_tmp.sql
 			  tail -n +2 database_tmp.sql > database.sql
-		      rm database_tmp.sql
+		      rm database_tmp.sql 2>/dev/null
 			  echo $green'database esportato in database.sql'
 			;;
 		esac
