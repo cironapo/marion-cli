@@ -7,7 +7,7 @@ Aggiornamento database
 ```bash
 marion db refresh
 ```
-**Moduli**:
+**Moduli**:  
 Creazione modulo
 ```bash
 marion module create nome_modulo
