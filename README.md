@@ -22,13 +22,14 @@ Il seguente comando permette di esportare il database corrente. Il file viene es
 ```bash
 marion db export
 ```
-## Moduli:  
-**Creazione modulo**
+## Moduli 
+**Creazione modulo**  
 Il seguente comando permette di creare un modulo per marion
 ```bash
 marion module create nome_modulo
 ```
 **Lista moduli**
+Ul seguente modulo permette di visualizzare la lista dei moduli presenti nel progetto. E' possibile fare anche un filtro per nome del modulo utilizzando l'opzione **--like=**search
 ```bash
 marion module list [[--like=word]]
 ```
