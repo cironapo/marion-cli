@@ -3,6 +3,10 @@ Creazione di un nuovo progetto marion
 ```bash
 marion init nome_progetto
 ```
+Per clonare un progetto esistente 
+```bash
+marion clone url_repository
+```
 Avvio ambiente di sviluppo
 ```bash
 marion up [[-d]]
