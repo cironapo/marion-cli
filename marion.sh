@@ -440,6 +440,14 @@ class '$name_class' extends Marion\Core\Module{
 		
 	}
 
+	/**
+		OVERRIDE SEEDER
+	**/
+	function seeder(){
+		$faker = $this->getFaker();
+	}
+
+
 }
 ?>' > $tag".php"
 	echo '<?php
@@ -871,7 +879,7 @@ class '$nameCtrl'Controller extends AdminModuleController{
 }
 
 init(){
-	mkdir -p $dir
+	mkdir $dir
 	wget 'http://repository.3d0.it/marion.zip'
 	mv marion.zip $dir
 	cd $dir
@@ -894,50 +902,17 @@ init(){
 	exit
 }
 
-clone(){
-	
-	cd $dir
-	mkdir cache
-	mkdir minimized
-	mkdir mysql
-	echo '#### DEVELOPMENT #### 
-APACHE_PORT_EXPOSED=80
-PHPMYADMIN_PORT_EXPOSED=8080
-
-#### PHP ####
-PHP_VESRION=7.2
-
-#### NGROK ####
-NGROK_PATH=ngrok
-
-#### MYSQL ####
-DB_HOST=db
-DB_PORT=3306
-DB_ROOTPASS=dbpwdroot
-DB_USER=dbuser
-DB_PASS=dbpwd
-DB_NAME=dbname' > .env
-	docker run --name $dir'_composer' -v $(pwd):/app -w /app/ webdevops/php-apache-dev:7.2 composer install
-	docker rm -f $dir'_composer'
-
-	docker run --name $dir'_db' -v $(pwd)/mysql:/var/lib/mysql mysql:5.7.31 mysql -u dbuser -pdbpwd db < database.sql 2>/dev/null
-	docker rm -f $dir"_db"
-	echo $green' Il tuo progetto marion è stato installato con successo. Buon divertimento!'
-	exit	
-}
-
 cmd=`echo $1 | sed 's/ *$//g'`
-if [ $cmd != 'init' ] && [ $cmd != 'clone' ];
+if [ $cmd != 'init' ];
 then
 	envup
 fi
 case $cmd in
+  'test')
+	docker run --name $dirname'_composer' -v $(pwd):/app -w /app/ webdevops/php-apache-dev:$PHP_VERSION composer install
+	docker rm -f $dirname'_composer'
+	;;
   'clone')
-		url=$2
-		basename=$(basename $url)
-		dir=${basename%.*}
-		git clone $url
-		clone
 	;;
   'init')
 		dir=$2
@@ -1096,6 +1071,9 @@ case $cmd in
 		  'reset')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_uninstall.php $3
 			docker exec -w /app $dirname"_web_1" php lib/console/module_install.php $3
+		  ;;
+		  'seed')
+			docker exec -w /app $dirname"_web_1" php lib/console/module_seeder.php $3
 		  ;;
 		  'active')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_active.php $3
