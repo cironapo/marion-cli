@@ -1064,6 +1064,10 @@ case $cmd in
 		 ;;
  		 'install')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_install.php $3
+			if [[ " ${args[*]} " == *"--seed"* ]];
+			then
+				docker exec -w /app $dirname"_web_1" php lib/console/module_seeder.php $3
+			fi
 		  ;;
 		  'uninstall')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_uninstall.php $3
@@ -1071,6 +1075,10 @@ case $cmd in
 		  'reset')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_uninstall.php $3
 			docker exec -w /app $dirname"_web_1" php lib/console/module_install.php $3
+			if [[ " ${args[*]} " == *"--seed"* ]];
+			then
+				docker exec -w /app $dirname"_web_1" php lib/console/module_seeder.php $3
+			fi
 		  ;;
 		  'seed')
 			docker exec -w /app $dirname"_web_1" php lib/console/module_seeder.php $3
