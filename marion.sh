@@ -1220,10 +1220,9 @@ case $cmd in
 		done
 	;;
   'export')
-		docker exec -ti $dirname"_db_1" mysqldump --no-tablespaces -u $DB_USER -p$DB_PASS $DB_NAME > database_tmp.sql
-		tail -n +2 database_tmp.sql > esportazione/database.sql
-		rm database_tmp.sql 2>/dev/null
-		mkdir -p esportazione
+		docker exec -ti $dirname"_db_1" mysqldump --no-tablespaces -u $DB_USER -p$DB_PASS $DB_NAME > esportazione/database_tmp.sql
+		tail -n +2 esportazione/database_tmp.sql > esportazione/database.sql
+		rm esportazione/database_tmp.sql 2>/dev/null
 		cp -R media esportazione/media
 		cp -R upload esportazione/upload
 		tar -cvf esportazione.tar esportazione
