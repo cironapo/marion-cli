@@ -1170,6 +1170,13 @@ case $cmd in
 			  fi
 			  
 			;;
+		    'deploy')
+			 
+				mysql -u $DB_USER -p$DB_PASS -e "DROP DATABASE IF EXISTS $DB_NAME" 2>/dev/null
+				mysql -u $DB_USER -p$DB_PASS -e "CREATE DATABASE $DB_NAME" 2>/dev/null
+				mysql -u $DB_USER -p$DB_PASS $DB_NAME < database.sql 2>/dev/null
+				echo $green'database ricaricato'
+			;;
 			'export')
 			  docker exec -ti $dirname"_db_1" mysqldump --no-tablespaces -u $DB_USER -p$DB_PASS $DB_NAME > database_tmp.sql
 			  tail -n +2 database_tmp.sql > database.sql
@@ -1211,5 +1218,15 @@ case $cmd in
 				echo "$line" | sed -e "s/[a-zA-Z_\)\/;\',\()]//g"
 			fi
 		done
+	;;
+  'export')
+		docker exec -ti $dirname"_db_1" mysqldump --no-tablespaces -u $DB_USER -p$DB_PASS $DB_NAME > database_tmp.sql
+		tail -n +2 database_tmp.sql > esportazione/database.sql
+		rm database_tmp.sql 2>/dev/null
+		mkdir -p esportazione
+		cp -R media esportazione/media
+		cp -R upload esportazione/upload
+		tar -cvf esportazione.tar esportazione
+		rm -r -f esportazione
 	;;
 esac
