@@ -146,6 +146,7 @@ create_module(){
 	mkdir "modules/$tag"
 	cd "modules/$tag"
 	mkdir 'controllers'
+	mkdir 'migrations'
 	mkdir 'controllers/admin'
 	mkdir 'controllers/front'
 	mkdir 'templates_twig'
@@ -552,6 +553,45 @@ class '$nameModel' extends Model{
 
 }
 
+create_migration(){
+	if [ ! -d "modules/$module" ]
+	then 
+		echo $red"Errore: il modulo non esiste"
+		exit;
+	fi
+	
+	if [ ! -d "modules/$module/migrations" ]
+	then 
+		mkdir modules/$module/migrations
+		echo $green'modules/'$module'/migrations'
+	fi
+	
+	now=$(date +%F_%H-%M-%S) 
+	name=$now"_"$migration".php"
+	if [ -f modules/$module/migrations/$name ]; then
+		echo $red'Errore: la migration '$name' già esiste'
+	else
+		echo '<?php
+use Illuminate\Database\Capsule\Manager as DB;
+use Marion\Core\Interfaces\Migration;
+class '$migration' implements Migration{
+
+	public function up(){
+
+	}
+
+	public function down(){
+
+	}
+}
+?>'> modules/$module/migrations/$name
+		echo $green'modules/'$module'/migrations/'$name
+	fi
+	
+
+	
+}
+
 create_page(){
 	if [ ! -d "modules/$module" ]
 	then 
@@ -822,6 +862,36 @@ class '$nameCtrl'Controller extends AdminModuleController{
 	public function displayList(){
 		$this->setMenu("'$nameCtrl'_list"); //attiva la voce di menu del backend.
 		$containter = $this->getListContainer();
+		
+		$fields = [
+
+			[
+				"name" => "ID",
+				"field_value" => "id",
+				"searchable" => true,
+				//"sortable" => true,
+				"sort_id" => "id",
+				"search_name" => "id",
+				"search_value" => "",
+				"search_type" => "input",
+			],
+			[
+				"name" => "value 2",
+				"field_value" => "value",
+				"searchable" => true,
+				//"sortable" => true,
+				"sort_id" => "id",
+				"search_name" => "id",
+				"search_value" => "",
+				"search_type" => "select",
+				"search_options" => [
+					"key1" => "value1",
+					"key2" => "value2",
+				]
+			],
+		];
+
+		$container->setFieldsFromArray($fields);
 
 		parent::displayList();
 	}
@@ -1048,6 +1118,33 @@ case $cmd in
 				if [ "$page" == '' ];
 				then
 					echo $red"Errore: occorre specificare il tipo di pagina (--type=page|backend|widget|base|form)"
+					exit
+				fi
+			fi
+			
+		;;
+		'migration')
+			migration=$3
+			if [[ "$3" == "" ]] || [[ " $3 " == *"--module="* ]] || [[ " $3 " == *"--type="* ]] ;
+			then
+				echo $red"Errore: occorre specificare il nome della migration"
+				exit
+			fi
+		 	module=''
+			if [[ " ${args[*]} " == *"--module="* ]];
+			then
+				module=$(get_mod_name)
+			fi
+
+		
+
+			if [ "$module" != '' ]; then
+				
+				create_migration
+			else
+				if [ "$module" == '' ];
+				then
+					echo $red"Errore: occorre specificare un modulo (--module=nome_modulo)"
 					exit
 				fi
 			fi
